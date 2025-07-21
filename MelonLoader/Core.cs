@@ -62,7 +62,7 @@ namespace MelonLoader
             DetourHelper.Native = new DetourNativeMonoPosixPlatform(new DetourNativeX86Platform());
 #endif
 
-            HarmonyInstance = new HarmonyLib.Harmony(BuildInfo.Name);
+            HarmonyInstance = new HarmonyLib.Harmony(Properties.BuildInfo.Name);
 
 #if !WINDOWS && !NET6_0_OR_GREATER
             Fixes.XTermFix.Install();
@@ -134,7 +134,6 @@ namespace MelonLoader
             Fixes.ProcessFix.Install();
 
 #if NET6_0_OR_GREATER
-            Fixes.AsmResolverFix.Install();
             Fixes.Il2CppInteropExceptionLog.Install();
 
 #if OSX
@@ -142,25 +141,23 @@ namespace MelonLoader
             Fixes.NativeLibraryFix.Install();
 #endif
 
-            //Fixes.Il2CppInteropFixes.Install();
+            Fixes.Il2CppInteropFixes.Install();
 
             Fixes.Il2CppICallInjector.Install();
 #endif
 
             PatchShield.Install();
 
-            if (MelonUtils.CurrentPlatform == MelonPlatformAttribute.CompatiblePlatforms.WINDOWS_X86
-                || MelonUtils.CurrentPlatform == MelonPlatformAttribute.CompatiblePlatforms.WINDOWS_X64)
-            {
-                Fixes.WindowsUnhandledQuit.Install();
-                MelonEvents.OnUpdate.Subscribe(Fixes.WindowsUnhandledQuit.Update, int.MaxValue);
-            }
+#if WINDOWS
+            Fixes.WindowsUnhandledQuit.Install();
+            MelonEvents.OnUpdate.Subscribe(Fixes.WindowsUnhandledQuit.Update, int.MaxValue);
+#endif
 
             MelonPreferences.Load();
 
             MelonCompatibilityLayer.LoadModules();
 
-            bHapticsManager.Connect(BuildInfo.Name, UnityInformationHandler.GameName);
+            bHapticsManager.Connect(Properties.BuildInfo.Name, UnityInformationHandler.GameName);
 
             MelonFolderHandler.ScanForFolders();
             MelonFolderHandler.LoadMelons(MelonFolderHandler.ScanType.UserLibs);
@@ -220,7 +217,7 @@ namespace MelonLoader
         {
             var lemon = LoaderConfig.Current.Loader.Theme == LoaderConfig.CoreConfig.LoaderTheme.Lemon;
             var versionStr = $"{(lemon ? "Lemon" : "Melon")}Loader " +
-                             $"v{BuildInfo.Version} " +
+                             $"v{Properties.BuildInfo.Version} " +
                              $"{(Is_ALPHA_PreRelease ? "ALPHA Pre-Release" : "Open-Beta")}";
             return versionStr;
         }
@@ -263,7 +260,7 @@ namespace MelonLoader
             bHapticsManager.Disconnect();
 
 #if NET6_0_OR_GREATER
-            //Fixes.Il2CppInteropFixes.Shutdown();
+            Fixes.Il2CppInteropFixes.Shutdown();
             Fixes.Il2CppICallInjector.Shutdown();
 #endif
 
