@@ -54,7 +54,7 @@ namespace MelonLoader.Fixes
         private static MethodInfo _getIl2CppTypeFullName;
         private static MethodInfo _fixedIsByRef;
         private static MethodInfo _get_IsByRef;
-        private static MethodInfo _fixedFindAbstractMethods;
+        // private static MethodInfo _fixedFindAbstractMethods;
         private static MethodInfo _emitObjectToPointer;
         private static MethodInfo _emitObjectToPointer_Prefix;
         private static MethodInfo _rewriteGlobalContext_AddAssemblyContext;
@@ -166,7 +166,7 @@ namespace MelonLoader.Fixes
                 _fixedFindType = thisType.GetMethod(nameof(FixedFindType), BindingFlags.NonPublic | BindingFlags.Static);
                 _fixedAddTypeToLookup = thisType.GetMethod(nameof(FixedAddTypeToLookup), BindingFlags.NonPublic | BindingFlags.Static);
                 _fixedIsByRef = thisType.GetMethod(nameof(FixedIsByRef), BindingFlags.NonPublic | BindingFlags.Static);
-                _fixedFindAbstractMethods = thisType.GetMethod(nameof(FixedFindAbstractMethods), BindingFlags.NonPublic | BindingFlags.Static);
+                // _fixedFindAbstractMethods = thisType.GetMethod(nameof(FixedFindAbstractMethods), BindingFlags.NonPublic | BindingFlags.Static);
                 //_systemTypeFromIl2CppType_Prefix = thisType.GetMethod(nameof(SystemTypeFromIl2CppType_Prefix), BindingFlags.NonPublic | BindingFlags.Static);
                 //_systemTypeFromIl2CppType_Transpiler = thisType.GetMethod(nameof(SystemTypeFromIl2CppType_Transpiler), BindingFlags.NonPublic | BindingFlags.Static);
                 _rewriteType_Prefix = thisType.GetMethod(nameof(RewriteType_Prefix), BindingFlags.NonPublic | BindingFlags.Static);
@@ -520,15 +520,15 @@ namespace MelonLoader.Fixes
                     LogDebugMsg("Patched Il2CppInterop ClassInjector.RegisterTypeInIl2Cpp -> InjectorHelpers.AddTypeToLookup");
                 }
 
-                if (!found2
-                    && instruction.ToString()
-                    .Contains("FindAbstractMethods"))
-                {
-                    found2 = true;
-                    instruction.opcode = OpCodes.Call;
-                    instruction.operand = _fixedFindAbstractMethods;
-                    LogDebugMsg("Patched Il2CppInterop ClassInjector.RegisterTypeInIl2Cpp -> FindAbstractMethods");
-                }
+                // if (!found2
+                //     && instruction.ToString()
+                //     .Contains("FindAbstractMethods"))
+                // {
+                //     found2 = true;
+                //     instruction.opcode = OpCodes.Call;
+                //     instruction.operand = _fixedFindAbstractMethods;
+                //     LogDebugMsg("Patched Il2CppInterop ClassInjector.RegisterTypeInIl2Cpp -> FindAbstractMethods");
+                // }
 
                 yield return instruction;
             }
@@ -571,56 +571,56 @@ namespace MelonLoader.Fixes
             }
         }
 
-        private static void FixedFindAbstractMethods(List<INativeMethodInfoStruct> list, INativeClassStruct klass)
-        {
-            if (klass.Parent != default) FixedFindAbstractMethods(list, UnityVersionHandler.Wrap(klass.Parent));
-
-            for (var i = 0; i < klass.MethodCount; i++)
-            {
-                var baseMethod = UnityVersionHandler.Wrap(klass.Methods[i]);
-                var name = Marshal.PtrToStringAnsi(baseMethod.Name)!;
-
-                if (baseMethod.Flags.HasFlag(Il2CppMethodFlags.METHOD_ATTRIBUTE_ABSTRACT))
-                    list.Add(baseMethod);
-                else
-                {
-                    var existing = list.SingleOrDefault(m =>
-                    {
-                        if (Marshal.PtrToStringAnsi(m.Name) != name) return false;
-                        if (m.ParametersCount != baseMethod.ParametersCount) return false;
-
-                        for (var i = 0; i < m.ParametersCount; i++)
-                        {
-                            var parameterName = IL2CPP.il2cpp_method_get_param_name(baseMethod.Pointer, (uint)i);
-                            var otherParameterName = IL2CPP.il2cpp_method_get_param_name(m.Pointer, (uint)i);
-
-                            var parameterInfo = UnityVersionHandler.Wrap(baseMethod.Parameters, i);
-                            var otherParameterInfo = UnityVersionHandler.Wrap(m.Parameters, i);
-
-                            if (parameterName != otherParameterName)
-                                return false;
-
-                            string parameterTypeName = (string)_getIl2CppTypeFullName.Invoke(null, [(IntPtr)parameterInfo.ParameterType]);
-                            string otherParameterTypeName = (string)_getIl2CppTypeFullName.Invoke(null, [(IntPtr)otherParameterInfo.ParameterType]);
-
-                            if ((parameterTypeName != $"Il2Cpp.{otherParameterTypeName}")
-                                && (parameterTypeName != $"Il2Cpp{otherParameterTypeName}")
-                                && ($"Il2Cpp.{parameterTypeName}" != otherParameterTypeName)
-                                && ($"Il2Cpp{parameterTypeName}" != otherParameterTypeName)
-                                && ($"Il2Cpp.{parameterTypeName}" != $"Il2Cpp.{otherParameterTypeName}")
-                                && ($"Il2Cpp{parameterTypeName}" != $"Il2Cpp{otherParameterTypeName}")
-                                && (parameterTypeName != otherParameterTypeName))
-                                return false;
-                        }
-
-                        return true;
-                    });
-
-                    if (existing != null)
-                        list.Remove(existing);
-                }
-            }
-        }
+        // private static void FixedFindAbstractMethods(List<INativeMethodInfoStruct> list, INativeClassStruct klass)
+        // {
+        //     if (klass.Parent != default) FixedFindAbstractMethods(list, UnityVersionHandler.Wrap(klass.Parent));
+        //
+        //     for (var i = 0; i < klass.MethodCount; i++)
+        //     {
+        //         var baseMethod = UnityVersionHandler.Wrap(klass.Methods[i]);
+        //         var name = Marshal.PtrToStringAnsi(baseMethod.Name)!;
+        //
+        //         if (baseMethod.Flags.HasFlag(Il2CppMethodFlags.METHOD_ATTRIBUTE_ABSTRACT))
+        //             list.Add(baseMethod);
+        //         else
+        //         {
+        //             var existing = list.SingleOrDefault(m =>
+        //             {
+        //                 if (Marshal.PtrToStringAnsi(m.Name) != name) return false;
+        //                 if (m.ParametersCount != baseMethod.ParametersCount) return false;
+        //
+        //                 for (var i = 0; i < m.ParametersCount; i++)
+        //                 {
+        //                     var parameterName = IL2CPP.il2cpp_method_get_param_name(baseMethod.Pointer, (uint)i);
+        //                     var otherParameterName = IL2CPP.il2cpp_method_get_param_name(m.Pointer, (uint)i);
+        //
+        //                     var parameterInfo = UnityVersionHandler.Wrap(baseMethod.Parameters, i);
+        //                     var otherParameterInfo = UnityVersionHandler.Wrap(m.Parameters, i);
+        //
+        //                     if (parameterName != otherParameterName)
+        //                         return false;
+        //
+        //                     string parameterTypeName = (string)_getIl2CppTypeFullName.Invoke(null, [(IntPtr)parameterInfo.ParameterType]);
+        //                     string otherParameterTypeName = (string)_getIl2CppTypeFullName.Invoke(null, [(IntPtr)otherParameterInfo.ParameterType]);
+        //
+        //                     if ((parameterTypeName != $"Il2Cpp.{otherParameterTypeName}")
+        //                         && (parameterTypeName != $"Il2Cpp{otherParameterTypeName}")
+        //                         && ($"Il2Cpp.{parameterTypeName}" != otherParameterTypeName)
+        //                         && ($"Il2Cpp{parameterTypeName}" != otherParameterTypeName)
+        //                         && ($"Il2Cpp.{parameterTypeName}" != $"Il2Cpp.{otherParameterTypeName}")
+        //                         && ($"Il2Cpp{parameterTypeName}" != $"Il2Cpp{otherParameterTypeName}")
+        //                         && (parameterTypeName != otherParameterTypeName))
+        //                         return false;
+        //                 }
+        //
+        //                 return true;
+        //             });
+        //
+        //             if (existing != null)
+        //                 list.Remove(existing);
+        //         }
+        //     }
+        // }
     }
 }
 #endif
