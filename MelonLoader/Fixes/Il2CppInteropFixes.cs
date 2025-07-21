@@ -578,7 +578,7 @@ namespace MelonLoader.Fixes
             for (var i = 0; i < klass.MethodCount; i++)
             {
                 var baseMethod = UnityVersionHandler.Wrap(klass.Methods[i]);
-                var name = Marshal.PtrToStringUni(baseMethod.Name)!;
+                var name = Marshal.PtrToStringAnsi(baseMethod.Name)!;
 
                 if (baseMethod.Flags.HasFlag(Il2CppMethodFlags.METHOD_ATTRIBUTE_ABSTRACT))
                     list.Add(baseMethod);
@@ -586,7 +586,7 @@ namespace MelonLoader.Fixes
                 {
                     var existing = list.SingleOrDefault(m =>
                     {
-                        if (Marshal.PtrToStringUni(m.Name) != name) return false;
+                        if (Marshal.PtrToStringAnsi(m.Name) != name) return false;
                         if (m.ParametersCount != baseMethod.ParametersCount) return false;
 
                         for (var i = 0; i < m.ParametersCount; i++)
@@ -597,7 +597,7 @@ namespace MelonLoader.Fixes
                             var parameterInfo = UnityVersionHandler.Wrap(baseMethod.Parameters, i);
                             var otherParameterInfo = UnityVersionHandler.Wrap(m.Parameters, i);
 
-                            if (Marshal.PtrToStringUni(parameterName) != Marshal.PtrToStringUni(otherParameterName))
+                            if (parameterName != otherParameterName)
                                 return false;
 
                             string parameterTypeName = (string)_getIl2CppTypeFullName.Invoke(null, [(IntPtr)parameterInfo.ParameterType]);
